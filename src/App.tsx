@@ -8,8 +8,12 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  Radio,
+  RadioGroup,
+  Stack,
   Text,
   Textarea,
+  Tooltip,
   useToast,
   VStack,
 } from '@chakra-ui/react';
@@ -30,6 +34,22 @@ function App() {
             <FormLabel>npm CLI 명령어</FormLabel>
             <Textarea name="input" w="100%" />
           </FormControl>
+          <RadioGroup>
+            <Stack direction="row">
+              <Radio value="npm">npm</Radio>
+              <Radio value="yarn">yarn</Radio>
+              <Radio value="pnpm">pnpm</Radio>
+              <Tooltip
+                placement="right"
+                hasArrow
+                label="도큐사우루스의 코드 블록 탭"
+              >
+                <Box>
+                  <Radio value="docusaurus">Docusaurus</Radio>
+                </Box>
+              </Tooltip>
+            </Stack>
+          </RadioGroup>
           <Button colorScheme="blue" type="submit">
             변환
           </Button>
