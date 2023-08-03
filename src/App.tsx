@@ -19,20 +19,34 @@ import {
 } from '@chakra-ui/react';
 import convert from 'npm-to-yarn';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 function App() {
   const [result, setResult] = useState('');
   const [isErrorInConversion, setIsErrorInConversion] = useState(false);
   const toast = useToast();
 
+  const { register, handleSubmit } = useForm<Inputs>();
+
+  const onSubmit = handleSubmit((data) => {
+    const result = npmCommandToDocusaurusTabs(data.command);
+
+    const isErrorMessageIncluded = result.includes(
+      `# couldn't auto-convert command`
+    );
+
+    setIsErrorInConversion(isErrorMessageIncluded);
+    setResult(result);
+  });
+
   return (
     <Container py="5">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={onSubmit}>
         <Heading as="h1">npm CLI 명령어 변환기</Heading>
         <VStack py="5" spacing="5">
           <FormControl>
             <FormLabel>npm CLI 명령어</FormLabel>
-            <Textarea name="input" w="100%" />
+            <Textarea w="100%" {...register('command')} />
           </FormControl>
           <RadioGroup>
             <Stack direction="row">
@@ -77,21 +91,6 @@ function App() {
     </Container>
   );
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>): void {
-    e.preventDefault();
-    const target = e.target as any;
-    const inputValue = target.input.value;
-
-    const result = npmCommandToDocusaurusTabs(inputValue);
-
-    const isErrorMessageIncluded = result.includes(
-      `# couldn't auto-convert command`
-    );
-
-    setIsErrorInConversion(isErrorMessageIncluded);
-    setResult(result);
-  }
-
   function handleCopyResult() {
     navigator.clipboard.writeText(result).then(() => {
       toast({
@@ -135,6 +134,11 @@ ${pnpmCommand}
 
     return result;
   }
+}
+
+interface Inputs {
+  command: string;
+  conversionType: 'npm' | 'yarn' | 'pnpm' | 'docusaurus';
 }
 
 export default App;
