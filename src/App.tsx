@@ -30,7 +30,12 @@ function App() {
   const conversionTypeRegister = register('conversionType');
 
   const onSubmit = handleSubmit((data) => {
-    const result = npmCommandToDocusaurusTabs(data.command);
+    let result = '';
+    if (data.conversionType === 'docusaurus') {
+      result = npmCommandToDocusaurusTabs(data.command);
+    } else {
+      result = convert(data.command, data.conversionType);
+    }
 
     const isErrorMessageIncluded = result.includes(
       `# couldn't auto-convert command`
