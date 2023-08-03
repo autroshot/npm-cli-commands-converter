@@ -8,28 +8,74 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  Radio,
+  RadioGroup,
+  Stack,
   Text,
   Textarea,
+  Tooltip,
   useToast,
   VStack,
 } from '@chakra-ui/react';
 import convert from 'npm-to-yarn';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 function App() {
   const [result, setResult] = useState('');
   const [isErrorInConversion, setIsErrorInConversion] = useState(false);
   const toast = useToast();
 
+  const { register, handleSubmit, setValue } = useForm<Inputs>();
+  const conversionTypeRegister = register('conversionType');
+
+  const onSubmit = handleSubmit((data) => {
+    let result = '';
+    if (data.conversionType === 'docusaurus') {
+      result = npmCommandToDocusaurusTabs(data.command);
+    } else {
+      result = convert(data.command, data.conversionType);
+    }
+
+    const isErrorMessageIncluded = result.includes(
+      `# couldn't auto-convert command`
+    );
+
+    setIsErrorInConversion(isErrorMessageIncluded);
+    setResult(result);
+  });
+
   return (
     <Container py="5">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={onSubmit}>
         <Heading as="h1">npm CLI 명령어 변환기</Heading>
         <VStack py="5" spacing="5">
           <FormControl>
             <FormLabel>npm CLI 명령어</FormLabel>
-            <Textarea name="input" w="100%" />
+            <Textarea w="100%" {...register('command')} />
           </FormControl>
+          <RadioGroup
+            name={conversionTypeRegister.name}
+            ref={conversionTypeRegister.ref}
+            onChange={(nextValue) =>
+              setValue('conversionType', nextValue as ConversionType)
+            }
+          >
+            <Stack direction="row">
+              <Radio value="npm">npm</Radio>
+              <Radio value="yarn">yarn</Radio>
+              <Radio value="pnpm">pnpm</Radio>
+              <Tooltip
+                placement="right"
+                hasArrow
+                label="도큐사우루스의 코드 블록 탭"
+              >
+                <Box>
+                  <Radio value="docusaurus">Docusaurus</Radio>
+                </Box>
+              </Tooltip>
+            </Stack>
+          </RadioGroup>
           <Button colorScheme="blue" type="submit">
             변환
           </Button>
@@ -56,21 +102,6 @@ function App() {
       </form>
     </Container>
   );
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>): void {
-    e.preventDefault();
-    const target = e.target as any;
-    const inputValue = target.input.value;
-
-    const result = npmCommandToDocusaurusTabs(inputValue);
-
-    const isErrorMessageIncluded = result.includes(
-      `# couldn't auto-convert command`
-    );
-
-    setIsErrorInConversion(isErrorMessageIncluded);
-    setResult(result);
-  }
 
   function handleCopyResult() {
     navigator.clipboard.writeText(result).then(() => {
@@ -116,5 +147,12 @@ ${pnpmCommand}
     return result;
   }
 }
+
+interface Inputs {
+  command: string;
+  conversionType: ConversionType;
+}
+
+type ConversionType = 'npm' | 'yarn' | 'pnpm' | 'docusaurus';
 
 export default App;
