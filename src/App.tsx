@@ -26,7 +26,8 @@ function App() {
   const [isErrorInConversion, setIsErrorInConversion] = useState(false);
   const toast = useToast();
 
-  const { register, handleSubmit } = useForm<Inputs>();
+  const { register, handleSubmit, setValue } = useForm<Inputs>();
+  const conversionTypeRegister = register('conversionType');
 
   const onSubmit = handleSubmit((data) => {
     const result = npmCommandToDocusaurusTabs(data.command);
@@ -48,7 +49,13 @@ function App() {
             <FormLabel>npm CLI 명령어</FormLabel>
             <Textarea w="100%" {...register('command')} />
           </FormControl>
-          <RadioGroup>
+          <RadioGroup
+            name={conversionTypeRegister.name}
+            ref={conversionTypeRegister.ref}
+            onChange={(nextValue) =>
+              setValue('conversionType', nextValue as ConversionType)
+            }
+          >
             <Stack direction="row">
               <Radio value="npm">npm</Radio>
               <Radio value="yarn">yarn</Radio>
@@ -138,7 +145,9 @@ ${pnpmCommand}
 
 interface Inputs {
   command: string;
-  conversionType: 'npm' | 'yarn' | 'pnpm' | 'docusaurus';
+  conversionType: ConversionType;
 }
+
+type ConversionType = 'npm' | 'yarn' | 'pnpm' | 'docusaurus';
 
 export default App;
