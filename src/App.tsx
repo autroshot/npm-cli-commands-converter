@@ -18,16 +18,45 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import convert from 'npm-to-yarn';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+
+const STORAGE_KEY = 'conversion-type';
 
 function App() {
   const [result, setResult] = useState('');
   const [isErrorInConversion, setIsErrorInConversion] = useState(false);
+
+  const [storage, setStorage] = useState<Storage>();
   const toast = useToast();
 
   const { register, handleSubmit, setValue } = useForm<Inputs>();
   const conversionTypeRegister = register('conversionType');
+
+  useEffect(() => {
+    const conversionTypeInStorage = localStorage.getItem(STORAGE_KEY);
+
+    if (
+      conversionTypeInStorage === null ||
+      !isConversionType(conversionTypeInStorage)
+    ) {
+      localStorage.setItem(STORAGE_KEY, 'npm');
+    } else {
+      setValue('conversionType', conversionTypeInStorage);
+    }
+
+    setStorage(storage);
+
+    function isConversionType(string: any): string is ConversionType {
+      const conversionTypes: ConversionType[] = [
+        'npm',
+        'yarn',
+        'pnpm',
+        'docusaurus',
+      ];
+      return conversionTypes.includes(string);
+    }
+  }, [setValue, storage]);
 
   const onSubmit = handleSubmit((data) => {
     let result = '';
