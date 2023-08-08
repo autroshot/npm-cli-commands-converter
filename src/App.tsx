@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react';
 import convert from 'npm-to-yarn';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 const STORAGE_KEY = 'conversion-type';
 
@@ -30,8 +30,7 @@ function App() {
   const [storage, setStorage] = useState<Storage>();
   const toast = useToast();
 
-  const { register, handleSubmit, setValue } = useForm<Inputs>();
-  const conversionTypeRegister = register('conversionType');
+  const { register, handleSubmit, setValue, control } = useForm<Inputs>();
 
   useEffect(() => {
     const conversionTypeInStorage = localStorage.getItem(STORAGE_KEY);
@@ -84,28 +83,28 @@ function App() {
             <FormLabel>npm CLI 명령어</FormLabel>
             <Textarea w="100%" {...register('command')} />
           </FormControl>
-          <RadioGroup
-            name={conversionTypeRegister.name}
-            ref={conversionTypeRegister.ref}
-            onChange={(nextValue) =>
-              setValue('conversionType', nextValue as ConversionType)
-            }
-          >
-            <Stack direction="row">
-              <Radio value="npm">npm</Radio>
-              <Radio value="yarn">yarn</Radio>
-              <Radio value="pnpm">pnpm</Radio>
-              <Tooltip
-                placement="right"
-                hasArrow
-                label="도큐사우루스의 코드 블록 탭"
-              >
-                <Box>
-                  <Radio value="docusaurus">Docusaurus</Radio>
-                </Box>
-              </Tooltip>
-            </Stack>
-          </RadioGroup>
+          <Controller
+            control={control}
+            name="conversionType"
+            render={({ field }) => (
+              <RadioGroup {...field}>
+                <Stack direction="row">
+                  <Radio value="npm">npm</Radio>
+                  <Radio value="yarn">yarn</Radio>
+                  <Radio value="pnpm">pnpm</Radio>
+                  <Tooltip
+                    placement="right"
+                    hasArrow
+                    label="도큐사우루스의 코드 블록 탭"
+                  >
+                    <Box>
+                      <Radio value="docusaurus">Docusaurus</Radio>
+                    </Box>
+                  </Tooltip>
+                </Stack>
+              </RadioGroup>
+            )}
+          />
           <Button colorScheme="blue" type="submit">
             변환
           </Button>
