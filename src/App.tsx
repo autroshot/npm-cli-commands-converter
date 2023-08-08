@@ -18,16 +18,44 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import convert from 'npm-to-yarn';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+
+const STORAGE_KEY = 'conversion-type';
 
 function App() {
   const [result, setResult] = useState('');
   const [isErrorInConversion, setIsErrorInConversion] = useState(false);
+
+  const [storage, setStorage] = useState<Storage>();
   const toast = useToast();
 
-  const { register, handleSubmit, setValue } = useForm<Inputs>();
-  const conversionTypeRegister = register('conversionType');
+  const { register, handleSubmit, setValue, control } = useForm<Inputs>();
+
+  useEffect(() => {
+    const conversionTypeInStorage = localStorage.getItem(STORAGE_KEY);
+
+    if (
+      conversionTypeInStorage === null ||
+      !isConversionType(conversionTypeInStorage)
+    ) {
+      localStorage.setItem(STORAGE_KEY, 'npm');
+    } else {
+      setValue('conversionType', conversionTypeInStorage);
+    }
+
+    setStorage(storage);
+
+    function isConversionType(string: any): string is ConversionType {
+      const conversionTypes: ConversionType[] = [
+        'npm',
+        'yarn',
+        'pnpm',
+        'docusaurus',
+      ];
+      return conversionTypes.includes(string);
+    }
+  }, [setValue, storage]);
 
   const onSubmit = handleSubmit((data) => {
     let result = '';
@@ -41,6 +69,7 @@ function App() {
       `# couldn't auto-convert command`
     );
 
+    localStorage.setItem(STORAGE_KEY, data.conversionType);
     setIsErrorInConversion(isErrorMessageIncluded);
     setResult(result);
   });
@@ -54,28 +83,28 @@ function App() {
             <FormLabel>npm CLI 명령어</FormLabel>
             <Textarea w="100%" {...register('command')} />
           </FormControl>
-          <RadioGroup
-            name={conversionTypeRegister.name}
-            ref={conversionTypeRegister.ref}
-            onChange={(nextValue) =>
-              setValue('conversionType', nextValue as ConversionType)
-            }
-          >
-            <Stack direction="row">
-              <Radio value="npm">npm</Radio>
-              <Radio value="yarn">yarn</Radio>
-              <Radio value="pnpm">pnpm</Radio>
-              <Tooltip
-                placement="right"
-                hasArrow
-                label="도큐사우루스의 코드 블록 탭"
-              >
-                <Box>
-                  <Radio value="docusaurus">Docusaurus</Radio>
-                </Box>
-              </Tooltip>
-            </Stack>
-          </RadioGroup>
+          <Controller
+            control={control}
+            name="conversionType"
+            render={({ field }) => (
+              <RadioGroup {...field}>
+                <Stack direction="row">
+                  <Radio value="npm">npm</Radio>
+                  <Radio value="yarn">yarn</Radio>
+                  <Radio value="pnpm">pnpm</Radio>
+                  <Tooltip
+                    placement="right"
+                    hasArrow
+                    label="도큐사우루스의 코드 블록 탭"
+                  >
+                    <Box>
+                      <Radio value="docusaurus">Docusaurus</Radio>
+                    </Box>
+                  </Tooltip>
+                </Stack>
+              </RadioGroup>
+            )}
+          />
           <Button colorScheme="blue" type="submit">
             변환
           </Button>
