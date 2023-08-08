@@ -70,6 +70,7 @@ function App() {
       `# couldn't auto-convert command`
     );
 
+    localStorage.setItem(STORAGE_KEY, data.conversionType);
     setIsErrorInConversion(isErrorMessageIncluded);
     setResult(result);
   });
