@@ -5,21 +5,16 @@ import {
   Button,
   Code,
   Container,
-  FormControl,
-  FormLabel,
   Heading,
-  Radio,
-  RadioGroup,
-  Stack,
   Text,
-  Textarea,
-  Tooltip,
   useToast,
   VStack,
 } from '@chakra-ui/react';
 import convert from 'npm-to-yarn';
 import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import ControlledRadioGroup from './ControlledRadioGroup';
+import TextareaWithLabel from './TextareaWithLabel';
 
 const STORAGE_KEY = 'conversion-type';
 
@@ -79,32 +74,11 @@ function App() {
       <form onSubmit={onSubmit}>
         <Heading as="h1">npm CLI 명령어 변환기</Heading>
         <VStack py="5" spacing="5">
-          <FormControl>
-            <FormLabel>npm CLI 명령어</FormLabel>
-            <Textarea w="100%" {...register('command')} />
-          </FormControl>
-          <Controller
-            control={control}
-            name="conversionType"
-            render={({ field }) => (
-              <RadioGroup {...field}>
-                <Stack direction="row">
-                  <Radio value="npm">npm</Radio>
-                  <Radio value="yarn">yarn</Radio>
-                  <Radio value="pnpm">pnpm</Radio>
-                  <Tooltip
-                    placement="right"
-                    hasArrow
-                    label="도큐사우루스의 코드 블록 탭"
-                  >
-                    <Box>
-                      <Radio value="docusaurus">Docusaurus</Radio>
-                    </Box>
-                  </Tooltip>
-                </Stack>
-              </RadioGroup>
-            )}
+          <TextareaWithLabel
+            labelText="npm CLI 명령어"
+            register={register('command')}
           />
+          <ControlledRadioGroup control={control} name="conversionType" />
           <Button colorScheme="blue" type="submit">
             변환
           </Button>
